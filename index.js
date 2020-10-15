@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const fileUpload = require('express-fileupload');
 // const { ObjectId } = require('mongodb');
 const app = express()
 const port = 4200
@@ -12,55 +13,128 @@ const MongoClient = require('mongodb').MongoClient;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hdbqd.mongodb.net/${process.env.DB_USER}?retryWrites=true&w=majority`;
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static('services'));
+app.use(fileUpload());
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
-    const productsCollection = client.db("assignment10").collection("events");
-    const userEventCollection = client.db("assignment10").collection("userEvents");
-    const ordersCollection = client.db("emaJohnStore").collection("order");
+    const servicesCollection = client.db("assignment11").collection("services");
+    const userServicesCollection = client.db("assignment11").collection("userServices");
+    const reviewCollection = client.db("assignment11").collection("review");
+    const adminCollection = client.db("assignment11").collection("admin");
+    const statusCollection = client.db("assignment11").collection("status");
 
-    // Uploading Events
-    app.post("/addEvent", (req, res) => {
-        const products = req.body;
-        productsCollection.insertOne(products)
+    // Uploading Services
+    app.post("/addService", (req, res) => {
+        const file = req.files.file;
+        const name = req.body.name;
+        const desc = req.body.desc;
+        const newImg = file.data;
+        const encImg = newImg.toString('base64');
+
+        var image = {
+            contentType: file.mimetype,
+            size: file.size,
+            img: Buffer.from(encImg, 'base64')
+        };
+
+        servicesCollection.insertOne({ name, desc, image })
             .then(result => {
-                res.send(result.insertedCount);
+                res.send(result.insertedCount > 0);
             })
     })
 
-    //   all Events
-    app.get('/events', (req, res) => {
-        productsCollection.find({})
+    //   Show Services to home
+    app.get('/services', (req, res) => {
+        servicesCollection.find({})
             .toArray((err, documents) => {
                 res.send(documents);
             })
     })
 
-    //   Adding User Events
-    app.post("/addUserEvent", (req, res) => {
-        const userEvent = req.body;
-        userEventCollection.insertOne(userEvent)
+    // Adding Admin via email
+    app.post("/addAdmin", (req, res) => {
+        const email = req.body.email;
+        adminCollection.insertOne({ email })
             .then(result => {
-                res.send(result.insertedCount);
+                res.send(result.insertedCount > 0);
             })
     })
 
-    //   all User Events
-    app.get('/userEventsAll', (req, res) => {
-        userEventCollection.find({})
+    // Adding Order
+    app.post("/addOrder", (req, res) => {
+        const file = req.files.file;
+        const name = req.body.name;
+        const desc = req.body.desc;
+        const email = req.body.email;
+        const service = req.body.service;
+        const price = req.body.price;
+        const newImg = file.data;
+        const encImg = newImg.toString('base64');
+
+        var image = {
+            contentType: file.mimetype,
+            size: file.size,
+            img: Buffer.from(encImg, 'base64')
+        };
+
+        userServicesCollection.insertOne({ name, desc, email, service, price, image })
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
+
+    // Showing Order
+    app.get('/allOrders', (req, res) => {
+        userServicesCollection.find({})
             .toArray((err, documents) => {
                 res.send(documents);
             })
     })
 
-    // Delete User Events
-    app.delete("/delete/:id", (req, res) => {
-        userEventCollection.deleteOne({ _id: ObjectId(req.params.id) })
+
+    // Making Review
+    app.post("/review", (req, res) => {
+        const name = req.body.name;
+        const desig = req.body.desig;
+        const desc = req.body.desc;
+        const photo = req.body.photo;
+        reviewCollection.insertOne({ name, desig, desc, photo })
             .then(result => {
-                // console.log(result);
-                res.send(result.deletedCount > 0)
+                res.send(result.insertedCount > 0);
             })
     })
 
+    // Get Review Collection
+    app.get('/getReview', (req, res) => {
+        reviewCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    })
+
+    // Status
+    app.patch("/addStatus/:id", (req, res) => {
+        const status = req.body.status;
+        // console.log(status);
+        userServicesCollection.updateOne(
+            { _id: ObjectId(req.params.id) },
+            { $set: { status } }
+            )
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
+
+    // Finding Admin
+    app.get('/findAdmin/:email', (req, res) => {
+        adminCollection.find({email: req.params.email})
+        // console.log(req.params.email)
+            .toArray((err, documents) => {
+                res.send(documents.length > 0);
+            })
+    })
+
+    
     // Using firebase backend controller
     const admin = require('firebase-admin');
     var serviceAccount = require("./earn-2018-firebase-adminsdk-7kbrn-e239f4c90e.json");
@@ -70,7 +144,7 @@ client.connect(err => {
     });
 
     //   // CRUD এর  READ method (R) //     //
-    app.get("/userEvents", (req, res) => {
+    app.get("/orders", (req, res) => {
         const bearer = req.headers.authorization
         if (bearer && bearer.startsWith('Bearer ')) {
 
@@ -81,12 +155,12 @@ client.connect(err => {
                 .then(function (decodedToken) {
                     const tokenEmail = decodedToken.email;
                     const queryEmail = req.query.email;
-                    // let uid = decodedToken.uid;
+                    let uid = decodedToken.uid;
                     // console.log({uid});
 
                     // // custom verification with email // //
                     if (tokenEmail == queryEmail) {
-                        userEventCollection.find({ email: queryEmail })
+                        userServicesCollection.find({ email: queryEmail })
                             .toArray((err, documents) => {
                                 res.status(200).send(documents);
                             })
