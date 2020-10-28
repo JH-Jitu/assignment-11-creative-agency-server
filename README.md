@@ -2,16 +2,17 @@
 
 [Portfolio Website](https://jh-jitu.github.io/Portfolio_Jitu/index.html)
 [Resume of Jitu](https://drive.google.com/file/d/1-3B8qqI42hpwolqwCOCxAf764-b2IsVe/view?fbclid=IwAR2A-A-keUlaVDokPxX-PP0kRbVbxrVnoAe43bqkaLdYfJfti1e6-sIlnYY)
+<br />
 
 ### Creative Agency
 This is an online course/service purchase type website. It’s developed by React, MongoDB, Firebase, JS, ES6, React-Router, React-Hooks, React-custom-hook, Html, CSS and Material UI.
-Link: https://creative-agency-f4b7e.web.app
-Features
-•	Different Link for User and Admin Panel. Admin Panel is fully protected.
-•	Adding Service Option, admin upgrading option for an admin
-•	Adding review option for user
-•	Services are under processing for a user till checked by an admin
-•	Fully Responsive with sign-in/up feature
+### Link: https://creative-agency-f4b7e.web.app
+### Features
+-	Different Link for User and Admin Panel. Admin Panel is fully protected.
+-	Adding Service Option, admin upgrading option for an admin
+-	Adding review option for user
+-	Services are under processing for a user till checked by an admin
+-	Fully Responsive with sign-in/up feature
 <br />
 <br />
 <br />
@@ -21,10 +22,10 @@ Features
 
 ## I'm a web developer, programmer and a student!!
 
-- 🌱 I’m currently learning everything
-- 👯 I’m looking to collaborate with other content creators
-- 🥅 2020 Goals: Contribute more to Open Source projects
-- ⚡ Fun fact: I love to play guitar
+-  I’m currently learning everything
+-  I’m looking to collaborate with other content creators
+-  2020 Goals: Contribute more to Open Source projects
+-  Fun fact: I love to play guitar
 
 ### Connect with me:
 
